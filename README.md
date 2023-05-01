@@ -16,7 +16,7 @@ this is my first python project for educational purpose only
 |    Item     |                             Midjourney prompt                             |
 |:-----------:|:-------------------------------------------------------------------------:|
 | Alien ship  | [green organic alien starfighter top view pure black background --v 5 ]() |
-| Player ship |                                                            |
+| Player ship |    [starwar style starfighter top view pure black background --v 5]()     |
 
 ## Licence
 
