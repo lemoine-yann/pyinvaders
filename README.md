@@ -1,4 +1,4 @@
-# pyinvaders - first python using pygame zero
+# pyinvaders - first python project using pygame zero
 
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-blue)](https://github.com/lemoine-yann)
 
