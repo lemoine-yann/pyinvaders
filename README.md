@@ -4,6 +4,17 @@
 
 this is my first python project for educational purpose only
 
+## Preview
+
+![Game Preview](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/preview.PNG)
+
+## Keys
+
+|    Key    |          Action          |
+|:---------:|:------------------------:|
+| <- and -> | move ship left and right |
+| spacebar  |          shoot           |
+
 ## Tools
 [PY Game Zero](https://pgzero-french.readthedocs.io)
 
@@ -13,10 +24,10 @@ this is my first python project for educational purpose only
 
 ## Images
 
-|    Item     |                             Midjourney prompt                             |
-|:-----------:|:-------------------------------------------------------------------------:|
-| Alien ship  | [green organic alien starfighter top view pure black background --v 5 ]() |
-| Player ship |    [starwar style starfighter top view pure black background --v 5]()     |
+|    Item     |                             Midjourney prompt                             | Preview                                                                                         |
+|:-----------:|:-------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------|
+| Alien ship  | [green organic alien starfighter top view pure black background --v 5 ]() | ![Alien Ship](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/alienship.png)  |
+| Player ship |    [starwar style starfighter top view pure black background --v 5]()     | ![Player Ship](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/playership.png) |
 
 
 ## Licence
