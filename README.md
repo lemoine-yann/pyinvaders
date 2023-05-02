@@ -24,10 +24,11 @@ this is my first python project for educational purpose only
 
 ## Images
 
-|    Item     |                             Midjourney prompt                             | Preview                                                                                         |
-|:-----------:|:-------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------|
-| Alien ship  | [green organic alien starfighter top view pure black background --v 5 ]() | ![Alien Ship](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/alienship.png)  |
-| Player ship |    [starwar style starfighter top view pure black background --v 5]()     | ![Player Ship](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/playership.png) |
+|    Item     |                             Midjourney prompt                             | Preview                                                                                           |
+|:-----------:|:-------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------|
+| Alien ship  | [green organic alien starfighter top view pure black background --v 5 ]() | ![Alien Ship](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/alienship.png)    |
+| Player ship |    [starwar style starfighter top view pure black background --v 5]()     | ![Player Ship](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/playership.png)  |
+|   Rocket    |    [simple rocket video game top view pure black background --v 5]()      | ![Rocket](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/rocket.png)           |
 
 
 ## Licence

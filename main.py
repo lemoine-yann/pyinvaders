@@ -34,16 +34,58 @@ PlayerSpeed = 10
 player = mod.Actor('playership', (PlayerX, PlayerY))
 
 
+# rocket settings
+RocketSpeed = 15
+PlayerCanShoot = True
+DelayBetweenRocket = 0.5
+
+# init rockets
+rockets = []
+for i in range(0, 3):  # 3 rockets available
+    newrocket = mod.Actor('rocket')
+    newrocket.left = -1000
+    newrocket.top = -1000
+    rockets.append(newrocket)  # -1000,-1000 mean disabled
+
+
 def draw():
     mod.screen.clear()
     for alien in aliens:  # draw each alien in array
         alien.draw()
+    for rocket in rockets:  # draw each active rockets
+        if rocket.left != -1000 and rocket.top != -1000:
+            rocket.draw()
     player.draw()  # draw player
 
 
 def update():
     move_aliens()
+    manage_rockets()
     manage_player()
+
+
+def manage_rockets():
+    global PlayerCanShoot, DelayBetweenRocket
+
+    if PlayerCanShoot and mod.keyboard.space:  # new shot requested
+        for rocket in rockets:
+            if rocket.left == -1000 and rocket.top == -1000:  # check if one rocket is available
+                rocket.center = player.center
+                rocket.bottom = player.top
+                PlayerCanShoot = False
+                mod.clock.schedule_unique(active_rockets, DelayBetweenRocket)  # active delay between rockets
+                break
+    for rocket in rockets:  # move active rockets
+        if rocket.left != -1000 and rocket.top != - 1000:
+            rocket.top -= RocketSpeed
+            if rocket.bottom < 0:  # check bounds
+                rocket.left = -1000
+                rocket.top = -1000
+
+
+def active_rockets():
+    global PlayerCanShoot
+    PlayerCanShoot = True
 
 
 def manage_player():
@@ -70,11 +112,9 @@ def move_aliens():
         if alien.left > WIDTH - alien.width:  # check bounds
             AlienDirection = Direction.LEFT
             directionchange = True
-            break
         elif alien.left < 0:
             AlienDirection = Direction.RIGHT
             directionchange = True
-            break
     if directionchange:  # alien move down if direction change
         for alien in aliens:
             alien.top += AlienComeDownSpeed
