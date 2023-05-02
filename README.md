@@ -22,6 +22,8 @@ this is my first python project for educational purpose only
 
 [Background removal](https://hotpot.ai/remove-background)
 
+[Gimp](https://www.gimp.org/)
+
 ## Images
 
 |    Item     |                             Midjourney prompt                             | Preview                                                                                           |
