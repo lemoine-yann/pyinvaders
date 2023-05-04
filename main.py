@@ -15,6 +15,7 @@ class Direction(Enum):
 
 
 AlienDirection = Direction.RIGHT
+BaseAlienSpeed = 2
 AlienSpeed = 2
 AlienComeDownSpeed = 20
 
@@ -26,6 +27,9 @@ for y in range(0, 4):  # 4 rows
 
 
 # player settings
+Round = 1
+Score = 0
+Lives = 3
 PlayerX = WIDTH / 2  # middle of screen
 PlayerY = HEIGHT - 80  # bottom of screen
 PlayerSpeed = 10
@@ -37,11 +41,11 @@ player = mod.Actor('playership', (PlayerX, PlayerY))
 # rocket settings
 RocketSpeed = 15
 PlayerCanShoot = True
-DelayBetweenRocket = 0.5
+DelayBetweenRocket = 0.25
 
 # init rockets
 rockets = []
-for i in range(0, 3):  # 3 rockets available
+for i in range(0, 4):  # 4 rockets available
     newrocket = mod.Actor('rocket')
     newrocket.left = -1000
     newrocket.top = -1000
@@ -56,16 +60,44 @@ def draw():
         if rocket.left != -1000 and rocket.top != -1000:
             rocket.draw()
     player.draw()  # draw player
+    mod.screen.draw.text('Score: ' + str(Score), (25, 15), color=(255, 255, 255), fontsize=30)  # draw score
+    mod.screen.draw.text('Lives: ' + str(Lives), (WIDTH - 100, 15), color=(255, 255, 255), fontsize=30)  # draw lives
 
 
 def update():
     move_aliens()
     manage_rockets()
     manage_player()
+    check_endofround()
+
+
+def check_endofround():  # check if all aliens are dead
+    atleastonealive = False
+    for alien in aliens:
+        if alien.left != -1000 and alien.top != 1000:  # check if alien is active
+            atleastonealive = True
+            break
+    if atleastonealive is False:
+        next_round()
+
+
+def next_round():  # next round
+    global AlienSpeed, BaseAlienSpeed, Round
+    Round += 1
+    AlienSpeed = BaseAlienSpeed + Round  # increase difficulty
+    for ry in range(0, 4):  # 4 rows
+        for rx in range(0, 10):  # 10 columns
+            aliens[ry + rx].left = rx * 150 + 100
+            aliens[ry + rx].top = ry * 120 + 100
+
+
+# check collides between two actors
+def check_collides(actor1, actor2):
+    return actor1.colliderect(actor2)
 
 
 def manage_rockets():
-    global PlayerCanShoot, DelayBetweenRocket
+    global PlayerCanShoot, DelayBetweenRocket, Score, AlienSpeed
 
     if PlayerCanShoot and mod.keyboard.space:  # new shot requested
         for rocket in rockets:
@@ -78,6 +110,15 @@ def manage_rockets():
     for rocket in rockets:  # move active rockets
         if rocket.left != -1000 and rocket.top != - 1000:
             rocket.top -= RocketSpeed
+            for alien in aliens:  # check collides
+                if check_collides(rocket, alien):
+                    Score += 1
+                    AlienSpeed += 0.25
+                    alien.left = -1000
+                    alien.top = -1000
+                    rocket.left = -1000
+                    rocket.top = -1000
+                    break
             if rocket.bottom < 0:  # check bounds
                 rocket.left = -1000
                 rocket.top = -1000
@@ -104,20 +145,22 @@ def move_aliens():
     directionchange = False
 
     for alien in aliens:
-        match AlienDirection:  # move aliens
-            case Direction.LEFT:
-                alien.left -= AlienSpeed
-            case Direction.RIGHT:
-                alien.left += AlienSpeed
-        if alien.left > WIDTH - alien.width:  # check bounds
-            AlienDirection = Direction.LEFT
-            directionchange = True
-        elif alien.left < 0:
-            AlienDirection = Direction.RIGHT
-            directionchange = True
+        if alien.left != -1000 and alien.top != 1000:  # check if alien is active
+            match AlienDirection:  # move aliens
+                case Direction.LEFT:
+                    alien.left -= AlienSpeed
+                case Direction.RIGHT:
+                    alien.left += AlienSpeed
+            if alien.left > WIDTH - alien.width:  # check bounds
+                AlienDirection = Direction.LEFT
+                directionchange = True
+            elif alien.left < 0:
+                AlienDirection = Direction.RIGHT
+                directionchange = True
     if directionchange:  # alien move down if direction change
         for alien in aliens:
-            alien.top += AlienComeDownSpeed
+            if alien.left != -1000 and alien.top != 1000:  # check if alien is active
+                alien.top += AlienComeDownSpeed
 
 
 pgzrun.go()
