@@ -83,15 +83,15 @@ def draw():
         for explosion in explosions:
             if explosion.left != -1000 and explosion.top != -1000:
                 explosion.draw()
-                explosion.next_image()
         player.draw()  # draw player
 
 
 def update():
-    move_aliens()
-    manage_rockets()
-    manage_player()
-    check_endofround()
+    if not GameOver:
+        move_aliens()
+        manage_rockets()
+        manage_player()
+        check_endofround()
 
 
 def gameover():  # game over
