@@ -59,11 +59,12 @@ explosion_images = ['regularexplosion00', 'regularexplosion01', 'regularexplosio
                     'regularexplosion04', 'regularexplosion05', 'regularexplosion06', 'regularexplosion07',
                     'regularexplosion08']
 for i in range(0, 4):  # 4 explosions available
-    explosion = mod.Actor('regularexplosion00')
-    explosion.left = -1000  # -1000,-1000 mean disabled
-    explosion.top = -1000
-    explosion.images = explosion_images  # set images
-    explosions.append(explosion)
+    newexplosion = mod.Actor('regularexplosion00')
+    newexplosion.left = -1000  # -1000,-1000 mean disabled
+    newexplosion.top = -1000
+    newexplosion.images = explosion_images  # set images
+    newexplosion.scale = 20
+    explosions.append(newexplosion)
 
 
 def draw():
@@ -79,6 +80,10 @@ def draw():
         for rocket in rockets:  # draw each active rockets
             if rocket.left != -1000 and rocket.top != -1000:
                 rocket.draw()
+        for explosion in explosions:
+            if explosion.left != -1000 and explosion.top != -1000:
+                explosion.draw()
+                explosion.next_image()
         player.draw()  # draw player
 
 
@@ -129,6 +134,13 @@ def check_collides(actor1, actor2):
     return actor1.colliderect(actor2)
 
 
+def spawn_explosion(alienposition):
+    for explosion in explosions:  # check if one explosion is available
+        if explosion.left == -1000 and explosion.top == -1000:
+            explosion.center = alienposition
+            break
+
+
 def manage_rockets():
     global PlayerCanShoot, DelayBetweenRocket, Score, AlienSpeed
 
@@ -145,6 +157,7 @@ def manage_rockets():
             rocket.top -= RocketSpeed
             for alien in aliens:  # check collides
                 if check_collides(rocket, alien):
+                    spawn_explosion(alien.center)
                     Score += 1
                     AlienSpeed += 0.25
                     alien.left = -1000
