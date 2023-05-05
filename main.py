@@ -27,6 +27,7 @@ for y in range(0, 4):  # 4 rows
 
 
 # player settings
+GameOver = False
 Round = 1
 Score = 0
 Lives = 3
@@ -52,16 +53,33 @@ for i in range(0, 4):  # 4 rockets available
     rockets.append(newrocket)  # -1000,-1000 mean disabled
 
 
+# init explosions
+explosions = []
+explosion_images = ['regularexplosion00', 'regularexplosion01', 'regularexplosion02', 'regularexplosion03',
+                    'regularexplosion04', 'regularexplosion05', 'regularexplosion06', 'regularexplosion07',
+                    'regularexplosion08']
+for i in range(0, 4):  # 4 explosions available
+    explosion = mod.Actor('regularexplosion00')
+    explosion.left = -1000  # -1000,-1000 mean disabled
+    explosion.top = -1000
+    explosion.images = explosion_images  # set images
+    explosions.append(explosion)
+
+
 def draw():
     mod.screen.clear()
-    for alien in aliens:  # draw each alien in array
-        alien.draw()
-    for rocket in rockets:  # draw each active rockets
-        if rocket.left != -1000 and rocket.top != -1000:
-            rocket.draw()
-    player.draw()  # draw player
     mod.screen.draw.text('Score: ' + str(Score), (25, 15), color=(255, 255, 255), fontsize=30)  # draw score
-    mod.screen.draw.text('Lives: ' + str(Lives), (WIDTH - 100, 15), color=(255, 255, 255), fontsize=30)  # draw lives
+    mod.screen.draw.text('Lives: ' + str(Lives), (WIDTH - 100, 15), color=(255, 255, 255),
+                         fontsize=30)  # draw lives
+    if GameOver:
+        mod.screen.draw.text('Game Over !', (WIDTH / 2, HEIGHT / 2), color=(255, 0, 0), fontsize=48)  # draw gameover
+    else:
+        for alien in aliens:  # draw each alien in array
+            alien.draw()
+        for rocket in rockets:  # draw each active rockets
+            if rocket.left != -1000 and rocket.top != -1000:
+                rocket.draw()
+        player.draw()  # draw player
 
 
 def update():
@@ -69,6 +87,20 @@ def update():
     manage_rockets()
     manage_player()
     check_endofround()
+
+
+def gameover():  # game over
+    global GameOver
+
+    for alien in aliens:
+        alien.left = -1000
+        alien.top = -1000
+    for rocket in rockets:
+        rocket.left = -1000
+        rocket.top = -1000
+    player.left = -1000
+    player.top = -1000
+    GameOver = True
 
 
 def check_endofround():  # check if all aliens are dead
@@ -85,10 +117,11 @@ def next_round():  # next round
     global AlienSpeed, BaseAlienSpeed, Round
     Round += 1
     AlienSpeed = BaseAlienSpeed + Round  # increase difficulty
+    index = 0
     for ry in range(0, 4):  # 4 rows
         for rx in range(0, 10):  # 10 columns
-            aliens[ry + rx].left = rx * 150 + 100
-            aliens[ry + rx].top = ry * 120 + 100
+            aliens[index].center = (rx * 150 + 100, ry * 120 + 100)
+            index += 1
 
 
 # check collides between two actors
