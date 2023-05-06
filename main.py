@@ -1,3 +1,4 @@
+import pygame
 import pgzrun
 from enum import Enum
 import sys
@@ -6,6 +7,8 @@ mod = sys.modules['__main__']  # fix dynamic references unresolved
 # screen size
 WIDTH = 1920
 HEIGHT = 1080
+Background = "background"
+lastTick = pygame.time.get_ticks()
 
 
 # aliens settings
@@ -52,6 +55,8 @@ for i in range(0, 4):  # 4 rockets available
     newrocket.top = -1000
     rockets.append(newrocket)  # -1000,-1000 mean disabled
 
+# explosion settings
+explosionAnimationTicks = 35
 
 # init explosions
 explosions = []
@@ -63,12 +68,12 @@ for i in range(0, 4):  # 4 explosions available
     newexplosion.left = -1000  # -1000,-1000 mean disabled
     newexplosion.top = -1000
     newexplosion.images = explosion_images  # set images
-    newexplosion.scale = 20
     explosions.append(newexplosion)
 
 
 def draw():
     mod.screen.clear()
+    mod.screen.blit(Background, (0, 0))
     mod.screen.draw.text('Score: ' + str(Score), (25, 15), color=(255, 255, 255), fontsize=30)  # draw score
     mod.screen.draw.text('Lives: ' + str(Lives), (WIDTH - 100, 15), color=(255, 255, 255),
                          fontsize=30)  # draw lives
@@ -91,6 +96,7 @@ def update():
         move_aliens()
         manage_rockets()
         manage_player()
+        anime_explosions()
         check_endofround()
 
 
@@ -134,10 +140,25 @@ def check_collides(actor1, actor2):
     return actor1.colliderect(actor2)
 
 
+def anime_explosions():
+    global lastTick
+
+    if (lastTick + explosionAnimationTicks) < pygame.time.get_ticks():
+        lastTick = pygame.time.get_ticks()
+        for explosion in explosions:
+            if explosion.left != -1000 and explosion.top != -1000:
+                if explosion.images.index(explosion.image) < len(explosion.images) - 1:  # iterate images
+                    explosion.image = explosion.images[explosion.images.index(explosion.image) + 1]
+                else:
+                    explosion.left = -1000
+                    explosion.top = -1000
+
+
 def spawn_explosion(alienposition):
     for explosion in explosions:  # check if one explosion is available
         if explosion.left == -1000 and explosion.top == -1000:
             explosion.center = alienposition
+            explosion.image = explosion.images[0]
             break
 
 
