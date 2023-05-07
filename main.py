@@ -1,14 +1,17 @@
+import random
 import pygame
 import pgzrun
 from enum import Enum
 import sys
 mod = sys.modules['__main__']  # fix dynamic references unresolved
 
+# init
+Background = "background"
+lastTick = pygame.time.get_ticks()
+
 # screen size
 WIDTH = 1920
 HEIGHT = 1080
-Background = "background"
-lastTick = pygame.time.get_ticks()
 
 
 # aliens settings
@@ -55,6 +58,21 @@ for i in range(0, 4):  # 4 rockets available
     newrocket.top = -1000
     rockets.append(newrocket)  # -1000,-1000 mean disabled
 
+
+# laser settings
+LaserSpeed = 10
+MaxLasers = 15
+NumberLasers = 4
+
+# init lasers
+lasers = []
+for i in range(0, MaxLasers):  # 15 lasers available
+    newlaser = mod.Actor('laser')
+    newlaser.left = -1000
+    newlaser.top = -1000
+    lasers.append(newlaser)  # -1000,-1000 mean disabled
+
+
 # explosion settings
 explosionAnimationTicks = 35
 
@@ -71,14 +89,21 @@ for i in range(0, 4):  # 4 explosions available
     explosions.append(newexplosion)
 
 
+# init player explosion
+    playerexplosion = mod.Actor('regularexplosion00')
+    playerexplosion.left = -1000  # -1000,-1000 mean disabled
+    playerexplosion.top = -1000
+    playerexplosion.images = explosion_images  # set images
+
+
 def draw():
     mod.screen.clear()
     mod.screen.blit(Background, (0, 0))
     mod.screen.draw.text('Score: ' + str(Score), (25, 15), color=(255, 255, 255), fontsize=30)  # draw score
     mod.screen.draw.text('Lives: ' + str(Lives), (WIDTH - 100, 15), color=(255, 255, 255),
                          fontsize=30)  # draw lives
-    if GameOver:
-        mod.screen.draw.text('Game Over !', (WIDTH / 2, HEIGHT / 2), color=(255, 0, 0), fontsize=48)  # draw gameover
+    if GameOver:  # draw Game Over !
+        mod.screen.draw.text('Game Over !', (WIDTH / 2 - 100, HEIGHT / 2), color=(255, 0, 0), fontsize=48)
     else:
         for alien in aliens:  # draw each alien in array
             alien.draw()
@@ -88,15 +113,21 @@ def draw():
         for explosion in explosions:
             if explosion.left != -1000 and explosion.top != -1000:
                 explosion.draw()
-        player.draw()  # draw player
+        for laser in lasers:  # draw each active lasers
+            if laser.left != -1000 and laser.top != -1000:
+                laser.draw()
+        if player.left != -1000 and player.top != -1000:
+            player.draw()  # draw player
 
 
 def update():
     if not GameOver:
         move_aliens()
         manage_rockets()
+        manage_lasers()
         manage_player()
         anime_explosions()
+        aliens_shot()
         check_endofround()
 
 
@@ -114,6 +145,17 @@ def gameover():  # game over
     GameOver = True
 
 
+def aliens_shot():
+    for alien in aliens:
+        if alien.left != -1000 and alien.top != 1000:  # check if alien is active
+            if random.random() >= 0.95:
+                for s in range(0, NumberLasers):
+                    if lasers[s].left == -1000 and lasers[s].top == -1000:  # check if laser is available
+                        lasers[s].left = alien.left + 25
+                        lasers[s].top = alien.top + 50
+                        break
+
+
 def check_endofround():  # check if all aliens are dead
     atleastonealive = False
     for alien in aliens:
@@ -125,9 +167,12 @@ def check_endofround():  # check if all aliens are dead
 
 
 def next_round():  # next round
-    global AlienSpeed, BaseAlienSpeed, Round
+    global AlienSpeed, BaseAlienSpeed, Round, NumberLasers
     Round += 1
     AlienSpeed = BaseAlienSpeed + Round  # increase difficulty
+    NumberLasers += 1  # increase difficulty, more lasers
+    if NumberLasers > MaxLasers:
+        NumberLasers = MaxLasers
     index = 0
     for ry in range(0, 4):  # 4 rows
         for rx in range(0, 10):  # 10 columns
@@ -159,7 +204,29 @@ def spawn_explosion(alienposition):
         if explosion.left == -1000 and explosion.top == -1000:
             explosion.center = alienposition
             explosion.image = explosion.images[0]
+            if random.random() >= 0.5:
+                mod.sounds.explosion1.play()
+            else:
+                mod.sounds.explosion2.play()
             break
+
+
+def manage_lasers():
+    global LaserSpeed, Lives, GameOver
+
+    for laser in lasers:  # move active lasers
+        if laser.left != -1000 and laser.top != -1000:
+            laser.top += LaserSpeed
+            if check_collides(laser, player):  # check if player is hit
+                Lives -= 1
+                laser.left = -1000
+                laser.top = -1000
+                if Lives <= 0:
+                    gameover()
+                    break
+            if laser.top > HEIGHT:  # check if laser is out of screen
+                laser.left = -1000
+                laser.top = -1000
 
 
 def manage_rockets():
@@ -171,21 +238,23 @@ def manage_rockets():
                 rocket.center = player.center
                 rocket.bottom = player.top
                 PlayerCanShoot = False
+                mod.sounds.pew.play()
                 mod.clock.schedule_unique(active_rockets, DelayBetweenRocket)  # active delay between rockets
                 break
     for rocket in rockets:  # move active rockets
         if rocket.left != -1000 and rocket.top != - 1000:
             rocket.top -= RocketSpeed
             for alien in aliens:  # check collides
-                if check_collides(rocket, alien):
-                    spawn_explosion(alien.center)
-                    Score += 1
-                    AlienSpeed += 0.25
-                    alien.left = -1000
-                    alien.top = -1000
-                    rocket.left = -1000
-                    rocket.top = -1000
-                    break
+                if alien.left != -1000 and alien.top != -1000:
+                    if check_collides(rocket, alien):
+                        spawn_explosion(alien.center)
+                        Score += 1
+                        AlienSpeed += 0.25
+                        alien.left = -1000
+                        alien.top = -1000
+                        rocket.left = -1000
+                        rocket.top = -1000
+                        break
             if rocket.bottom < 0:  # check bounds
                 rocket.left = -1000
                 rocket.top = -1000
