@@ -105,8 +105,6 @@ def draw():
     if GameOver:  # draw Game Over !
         mod.screen.draw.text('Game Over !', (WIDTH / 2 - 100, HEIGHT / 2), color=(255, 0, 0), fontsize=48)
     else:
-        for alien in aliens:  # draw each alien in array
-            alien.draw()
         for rocket in rockets:  # draw each active rockets
             if rocket.left != -1000 and rocket.top != -1000:
                 rocket.draw()
@@ -116,8 +114,12 @@ def draw():
         for laser in lasers:  # draw each active lasers
             if laser.left != -1000 and laser.top != -1000:
                 laser.draw()
+        for alien in aliens:  # draw each alien in array
+            alien.draw()
         if player.left != -1000 and player.top != -1000:
             player.draw()  # draw player
+        if playerexplosion.left != -1000 and playerexplosion.top != -1000:
+            playerexplosion.draw()  # draw player explosion
 
 
 def update():
@@ -146,14 +148,15 @@ def gameover():  # game over
 
 
 def aliens_shot():
-    for alien in aliens:
-        if alien.left != -1000 and alien.top != 1000:  # check if alien is active
-            if random.random() >= 0.95:
-                for s in range(0, NumberLasers):
-                    if lasers[s].left == -1000 and lasers[s].top == -1000:  # check if laser is available
-                        lasers[s].left = alien.left + 25
-                        lasers[s].top = alien.top + 50
-                        break
+    if player.left != -1000 and player.top != -1000:  # check if player is active
+        for alien in aliens:
+            if alien.left != -1000 and alien.top != 1000:  # check if alien is active
+                if random.random() >= 0.95:
+                    for s in range(0, NumberLasers):
+                        if lasers[s].left == -1000 and lasers[s].top == -1000:  # check if laser is available
+                            lasers[s].left = alien.left + 25
+                            lasers[s].top = alien.top + 50
+                            break
 
 
 def check_endofround():  # check if all aliens are dead
@@ -197,6 +200,15 @@ def anime_explosions():
                 else:
                     explosion.left = -1000
                     explosion.top = -1000
+        if playerexplosion.left != -1000 and playerexplosion.top != -1000:
+            if playerexplosion.images.index(playerexplosion.image) < len(playerexplosion.images) - 1:
+                playerexplosion.image = playerexplosion.images[playerexplosion.images.index(playerexplosion.image) + 1]
+            else:
+                playerexplosion.left = -1000
+                playerexplosion.top = -1000
+                if Lives <= 0:
+                    gameover()
+                mod.clock.schedule_unique(active_player, 0.5)
 
 
 def spawn_explosion(alienposition):
@@ -221,12 +233,18 @@ def manage_lasers():
                 Lives -= 1
                 laser.left = -1000
                 laser.top = -1000
-                if Lives <= 0:
-                    gameover()
-                    break
+                player_explode()
             if laser.top > HEIGHT:  # check if laser is out of screen
                 laser.left = -1000
                 laser.top = -1000
+
+
+def player_explode():
+    playerexplosion.center = player.center
+    playerexplosion.image = playerexplosion.images[0]
+    mod.sounds.explosion1.play()
+    player.left = -1000
+    player.top = -1000
 
 
 def manage_rockets():
@@ -265,7 +283,13 @@ def active_rockets():
     PlayerCanShoot = True
 
 
+def active_player():
+    player.center = (PlayerX, PlayerY)
+
+
 def manage_player():
+    global Lives, Score, AlienSpeed
+
     if mod.keyboard.left:  # move ship
         player.left -= PlayerSpeed
     elif mod.keyboard.right:
@@ -274,11 +298,23 @@ def manage_player():
         player.left = WIDTH - player.width
     elif player.left < 0:
         player.left = 0
+    if player.left != -1000 and player.top != -1000:  # if player is active
+        for alien in aliens:
+            if alien.left != -1000 and alien.top != 1000:  # check if alien is active
+                if check_collides(alien, player):  # check if player is hit
+                    Lives -= 1
+                    Score += 2
+                    AlienSpeed += 0.25
+                    spawn_explosion(alien.center)
+                    player_explode()
+                    alien.left = -1000
+                    alien.top = -1000
 
 
 def move_aliens():
-    global AlienDirection, AlienSpeed, AlienComeDownSpeed
+    global AlienDirection, AlienSpeed, AlienComeDownSpeed, Lives
     directionchange = False
+    touchearth = False
 
     for alien in aliens:
         if alien.left != -1000 and alien.top != 1000:  # check if alien is active
@@ -293,10 +329,16 @@ def move_aliens():
             elif alien.left < 0:
                 AlienDirection = Direction.RIGHT
                 directionchange = True
-    if directionchange:  # alien move down if direction change
-        for alien in aliens:
-            if alien.left != -1000 and alien.top != 1000:  # check if alien is active
-                alien.top += AlienComeDownSpeed
+            if alien.top >= HEIGHT - alien.height:
+                touchearth = True
+    if player.left != -1000 and player.top != -1000:
+        if touchearth:  # check if aliens touch earth
+            Lives = 0
+            player_explode()
+        if directionchange:  # alien move down if direction change
+            for alien in aliens:
+                if alien.left != -1000 and alien.top != 1000:  # check if alien is active
+                    alien.top += AlienComeDownSpeed
 
 
 pgzrun.go()

@@ -6,7 +6,7 @@ this is my first python project for educational purpose only
 
 ## Preview
 
-![Game Preview](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/preview-06052023.png)
+![Game Preview](https://s3.eu-west-1.amazonaws.com/lemoine.yann/github/pyinvaders/preview_08052023.png)
 
 ## Keys
 
